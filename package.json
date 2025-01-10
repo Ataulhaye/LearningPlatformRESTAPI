@@ -6,7 +6,9 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node dist/server.js",
     "dev": "ts-node-dev src/server.ts",
-    "build": "tsc"
+    "build": "tsc",
+    "load-mock-data": "ts-node src/scripts/loadMockData.ts",
+    "debug-mock-data": "node --inspect-brk -r ts-node/register src/scripts/loadMockData.ts"
   },
   "keywords": [],
   "author": "",
@@ -15,9 +17,11 @@
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
+    "csv-parser": "^3.1.0",
     "dotenv": "^16.0.3",
     "express": "^4.18.2",
     "jsonwebtoken": "^9.0.0",
+    "mongodb": "^6.12.0",
     "mongoose": "^7.0.3"
   },
   "devDependencies": {
