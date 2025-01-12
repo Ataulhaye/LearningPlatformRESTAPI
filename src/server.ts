@@ -1,12 +1,13 @@
 import express, { Application, Request, Response } from 'express';
-import mongoose from 'mongoose';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import authRoutes from './routes/auth';
-import userRoutes from './routes/users';
-
+import {getMongoDBInstance} from './mongodal/database';
+import authRoutes from './routes/authRoutes';
 
 dotenv.config();
+
+const PORT = parseInt(process.env.PORT || '5000', 10);
+const HOST = process.env.HOST || 'localhost';
 
 const app: Application = express();
 
@@ -18,20 +19,21 @@ app.get('/', (req: Request, res: Response) => {
   res.json({ message: 'Welcome to School Learning Platform API' });
 });
 
-const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/school_platform';
-
-mongoose.connect(mongoUri)
-  .then(() => console.log('✅ Connected to MongoDB'))
-  .catch((err) => console.error('❌ MongoDB connection error:', err));
 
 // Routes
 app.use('/api/auth', authRoutes);
-app.use('/api/users', userRoutes);
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`
-🚀 Server is running on port ${PORT}
-📚 API Documentation: http://localhost:${PORT}
-  `);
-}); 
+// Start server
+const startServer = async (): Promise<void> => {
+  try {
+    await getMongoDBInstance();
+    app.listen(PORT, HOST, () => {
+    console.log(`🚀 Server running on http://${HOST}:${PORT}`);
+  });
+} catch (error) {
+  console.error('Failed to start server:', error);
+  process.exit(1);
+}
+};
+
+startServer();
