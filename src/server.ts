@@ -16,7 +16,7 @@ app.use(express.json());
 
 // Welcome route
 app.get('/', (req: Request, res: Response) => {
-  res.json({ message: 'Welcome to School Learning Platform API' });
+  res.json({ message: 'Welcome to Learning Platform API' });
 });
 
 

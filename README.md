@@ -1,6 +1,6 @@
-# School Learning Platform API
+# Learning Platform API
 
-A RESTful API built with Node.js, Express, TypeScript, and MongoDB for managing a school learning platform. This API supports user authentication, role-based access (teachers/students), and user management.
+A RESTful API built with Node.js, Express, TypeScript, and MongoDB for managing a learning platform. This API supports user authentication, role-based access (teachers/students), and user management.
 
 ## Features
 
@@ -73,3 +73,6 @@ npm start
 - `src/routes/users.ts`: User management routes
 - `src/models/User.ts`: User model
 - `src/middleware/auth.ts`: Authentication middleware
+
+# How to generate JWT_SECRET
+node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"

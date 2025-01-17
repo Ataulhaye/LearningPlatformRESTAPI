@@ -12,7 +12,6 @@ dotenv.config();
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 const HOST = process.env.HOST || 'localhost';
 const PORT = process.env.PORT || '5000';
-const PROTOCOL = process.env.PROTOCOL || 'http';
 
 // Register a new user
 export const register = async (req: Request, res: Response): Promise<void> => {
@@ -94,6 +93,11 @@ export const forgotPassword = async (req: Request, res: Response): Promise<void>
         }
 
         const resetToken = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '15m' });
+
+        let PROTOCOL = 'http';
+        if(req.secure){
+            PROTOCOL = 'https';
+        }
 
         const resetLink = `${PROTOCOL}://${HOST}:${PORT}/reset-password/${resetToken}`;
 

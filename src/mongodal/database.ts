@@ -3,8 +3,8 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-const connStr = process.env.MONGODB_CONNECTION_STRING || 'mongodb://localhost:27017/school_platform';
-const dbName = process.env.DB_NAME || 'school_platform';
+const connStr = process.env.MONGODB_CONNECTION_STRING || 'mongodb://localhost:27017/learning_platform';
+const dbName = process.env.DB_NAME || 'learning_platform';
 
 let db: Db | null = null;
 
