@@ -4,12 +4,13 @@ import jwt from 'jsonwebtoken';
 import { sendEmail } from '../Utils/email';
 import { getMongoDBInstance } from '../mongodal/database';
 import dotenv from 'dotenv';
+import { ObjectId } from 'mongodb';
 import { User } from '../models/userModel';
 import { validateUser } from '../validators/userValidator';
 
 dotenv.config();
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
+const JWT_SECRET = process.env.JWT_SECRET || 'some-secret-key';
 const HOST = process.env.HOST || 'localhost';
 const PORT = process.env.PORT || '5000';
 
@@ -109,3 +110,28 @@ export const forgotPassword = async (req: Request, res: Response): Promise<void>
     }
 };
 
+// Handle reset password
+export const resetPassword = async (req: Request, res: Response): Promise<void> => {
+    const { token } = req.params;
+    const { newPassword } = req.body;
+
+    try {
+        const decoded: any = jwt.verify(token, JWT_SECRET);
+        const userId = decoded.userId;
+
+        const db = await getMongoDBInstance();
+        const user = await db.collection('users').findOne({ _id: new ObjectId(userId) });
+
+        if (!user) {
+            res.status(404).json({ message: 'User not found' });
+            return;
+        }
+
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        await db.collection('users').updateOne({ _id: new ObjectId(userId) }, { $set: { password: hashedPassword } });
+
+        res.json({ message: 'Password reset successfully' });
+    } catch (error) {
+        res.status(500).json({ message: 'Error resetting password', error: (error as Error).message });
+    }
+};
