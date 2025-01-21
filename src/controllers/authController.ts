@@ -13,6 +13,7 @@ dotenv.config();
 const JWT_SECRET = process.env.JWT_SECRET || 'some-secret-key';
 const HOST = process.env.HOST || 'localhost';
 const PORT = process.env.PORT || '5000';
+const UIPORT = process.env.UIPORT || '3000';
 
 // Register a new user
 export const register = async (req: Request, res: Response): Promise<void> => {
@@ -100,7 +101,7 @@ export const forgotPassword = async (req: Request, res: Response): Promise<void>
             PROTOCOL = 'https';
         }
 
-        const resetLink = `${PROTOCOL}://${HOST}:${PORT}/reset-password/${resetToken}`;
+        const resetLink = `${PROTOCOL}://${HOST}:${UIPORT}/reset-password/${resetToken}`;
 
         await sendEmail(email, 'Password Reset', `Click here to reset your password: ${resetLink}`);
 
@@ -133,5 +134,23 @@ export const resetPassword = async (req: Request, res: Response): Promise<void> 
         res.json({ message: 'Password reset successfully' });
     } catch (error) {
         res.status(500).json({ message: 'Error resetting password', error: (error as Error).message });
+    }
+};
+
+export const getUserById = async (req: Request, res: Response): Promise<void> => {
+    const {id}  = req.params;
+
+    try {
+        const db = await getMongoDBInstance();
+        const user = await db.collection('users').findOne({ _id: new ObjectId(id) });
+
+        if (!user) {
+            res.status(404).json({ message: 'User not found' });
+            return;
+        }
+
+        res.json({ email: user.email });
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching user details', error: (error as Error).message });
     }
 };
