@@ -7,6 +7,7 @@ import dotenv from 'dotenv';
 import { ObjectId } from 'mongodb';
 import { User } from '../models/userModel';
 import { validateUser } from '../validators/userValidator';
+import { verifyRecaptcha } from '../Utils/recaptcha';
 
 dotenv.config();
 
@@ -17,9 +18,16 @@ const UIPORT = process.env.UIPORT || '3000';
 
 // Register a new user
 export const register = async (req: Request, res: Response): Promise<void> => {
-    //if(req.secure){
-    //}
-    const { name, email, password, role } = req.body;
+
+    const { name, email, password, role, recaptchaToken } = req.body;
+
+    // Verify reCAPTCHA
+    const isRecaptchaValid = await verifyRecaptcha(recaptchaToken);
+    if (!isRecaptchaValid) {
+        res.status(400).json({ message: 'Invalid reCAPTCHA' });
+        return;
+    }
+
     let newUser: User = { name, email, password, role: role || 'student' };
 
     // Validate user data
@@ -51,7 +59,14 @@ export const register = async (req: Request, res: Response): Promise<void> => {
 
 // Log in an existing user
 export const login = async (req: Request, res: Response): Promise<void> => {
-    const { email, password } = req.body;
+    const { email, password, recaptchaToken } = req.body;
+
+    // Verify reCAPTCHA
+    const isRecaptchaValid = await verifyRecaptcha(recaptchaToken);
+    if (!isRecaptchaValid) {
+        res.status(400).json({ message: 'Invalid reCAPTCHA' });
+        return;
+    }
 
     try {
         const db = await getMongoDBInstance();
@@ -83,7 +98,14 @@ export const login = async (req: Request, res: Response): Promise<void> => {
 
 // Handle forgot password
 export const forgotPassword = async (req: Request, res: Response): Promise<void> => {
-    const { email } = req.body;
+    const { email, recaptchaToken } = req.body;
+
+    // Verify reCAPTCHA
+    const isRecaptchaValid = await verifyRecaptcha(recaptchaToken);
+    if (!isRecaptchaValid) {
+        res.status(400).json({ message: 'Invalid reCAPTCHA' });
+        return;
+    }
 
     try {
         const db = await getMongoDBInstance();
@@ -114,8 +136,15 @@ export const forgotPassword = async (req: Request, res: Response): Promise<void>
 // Handle reset password
 export const resetPassword = async (req: Request, res: Response): Promise<void> => {
     const { token } = req.params;
-    const { newPassword } = req.body;
+    const { newPassword, recaptchaToken } = req.body;
 
+    // Verify reCAPTCHA
+    const isRecaptchaValid = await verifyRecaptcha(recaptchaToken);
+    if (!isRecaptchaValid) {
+        res.status(400).json({ message: 'Invalid reCAPTCHA' });
+        return;
+    }
+    
     try {
         const decoded: any = jwt.verify(token, JWT_SECRET);
         const userId = decoded.userId;
