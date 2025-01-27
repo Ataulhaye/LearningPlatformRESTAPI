@@ -11,9 +11,8 @@ import { verifyRecaptcha } from '../Utils/recaptcha';
 
 dotenv.config();
 
-const JWT_SECRET = process.env.JWT_SECRET || 'some-secret-key';
+const JWT_SECRET = process.env.JWT_SECRET || '';
 const HOST = process.env.HOST || 'localhost';
-const PORT = process.env.PORT || '5000';
 const UIPORT = process.env.UIPORT || '3000';
 
 // Register a new user

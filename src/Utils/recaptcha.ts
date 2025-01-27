@@ -10,7 +10,11 @@ export const verifyRecaptcha = async (recaptchaToken: string): Promise<boolean> 
         const response = await axios.post(
             `https://www.google.com/recaptcha/api/siteverify?secret=${RECAPTCHA_SECRET_KEY}&response=${recaptchaToken}`
         );
-        return response.data.success;
+        
+        const { success, score } = response.data;
+
+        // Check if the verification was successful and the score is above the threshold
+        return success && score >= 0.5;
     } catch (error) {
         console.error('Error verifying reCAPTCHA:', error);
         return false;
