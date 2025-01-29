@@ -84,7 +84,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
         }
 
         const token = jwt.sign(
-            { userId: user._id, role: user.role },
+            { userId: user._id, email: user.email, name: user.name, role: user.role },
             JWT_SECRET,
             { expiresIn: '1h' }
         );
@@ -115,7 +115,7 @@ export const forgotPassword = async (req: Request, res: Response): Promise<void>
             return;
         }
 
-        const resetToken = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '15m' });
+        const resetToken = jwt.sign({ userId: user._id, email: user.email, name: user.name, role: user.role }, JWT_SECRET, { expiresIn: '15m' });
 
         let PROTOCOL = 'http';
         if(req.secure){
@@ -156,6 +156,11 @@ export const resetPassword = async (req: Request, res: Response): Promise<void> 
             return;
         }
 
+        if (decoded.exp < Date.now() / 1000) {
+            res.status(400).json({ message: 'Token expired' });
+            return;
+        }
+        
         const hashedPassword = await bcrypt.hash(newPassword, 10);
         await db.collection('users').updateOne({ _id: new ObjectId(userId) }, { $set: { password: hashedPassword } });
 
