@@ -14,6 +14,7 @@ dotenv.config();
 const JWT_SECRET = process.env.JWT_SECRET || '';
 const HOST = process.env.HOST || 'localhost';
 const UIPORT = process.env.UIPORT || '3000';
+const ENV = process.env.ENV || 'development';
 
 // Register a new user
 export const register = async (req: Request, res: Response): Promise<void> => {
@@ -89,6 +90,8 @@ export const login = async (req: Request, res: Response): Promise<void> => {
             { expiresIn: '1h' }
         );
 
+        res.cookie('token', token, { httpOnly: true, secure: ENV === 'production' });
+
         res.json({ token, user: { name: user.name, email: user.email, role: user.role } });
     } catch (error) {
         res.status(500).json({ message: 'Error logging in', error: (error as Error).message });
@@ -160,7 +163,7 @@ export const resetPassword = async (req: Request, res: Response): Promise<void> 
             res.status(400).json({ message: 'Token expired' });
             return;
         }
-        
+
         const hashedPassword = await bcrypt.hash(newPassword, 10);
         await db.collection('users').updateOne({ _id: new ObjectId(userId) }, { $set: { password: hashedPassword } });
 
